@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">SensorApp</string>
+    <string name="sensor_x">Sensor X value:</string>
+    <string name="sensor_y">Sensor Y value:</string>
+    <string name="sensor_Z">Sensor Z value:</string>
+    <string name="steps">Steps:</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+</resources>
