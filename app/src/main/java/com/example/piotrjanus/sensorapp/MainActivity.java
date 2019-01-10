@@ -46,6 +46,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     private int iterator = 0;
     private double max = 0;
     private int steps = 0;
+    private String buttonText;
+    private boolean isChart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +75,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         stepsTextView.setText(String.valueOf(0));
 
 
+
+
         powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "app:wakeLock");
 
@@ -80,6 +84,27 @@ public class MainActivity extends Activity implements SensorEventListener {
         lineGraph = new LineGraph("X series", "Y series", "Z series");
         chartView = lineGraph.getChartView(this);
         chart.addView(chartView);
+
+        if (savedInstanceState != null){
+            steps = savedInstanceState.getInt("steps");
+            stepsTextView.setText(String.valueOf(steps));
+            isRunning = savedInstanceState.getBoolean("isRunning");
+            buttonText = savedInstanceState.getString("buttonText");
+            button.setText(buttonText);
+
+            isChart = savedInstanceState.getBoolean("isChart");
+            if (isChart) {
+                graphListX = savedInstanceState.getParcelableArrayList("graphListX");
+                graphListY = savedInstanceState.getParcelableArrayList("graphListY");
+                graphListZ = savedInstanceState.getParcelableArrayList("graphListZ");
+
+                lineGraph.addAllDataX(graphListX);
+                lineGraph.addAllDataY(graphListY);
+                lineGraph.addAllDataZ(graphListZ);
+                chartView.repaint();
+            }
+
+        }
 
     }
 
@@ -92,14 +117,24 @@ public class MainActivity extends Activity implements SensorEventListener {
             graphListX.clear();
             graphListY.clear();
             graphListZ.clear();
-            button.setText(R.string.stop);
+            buttonText = getString(R.string.stop);
+            button.setText(buttonText);
 
             lineGraph.clearData();
+            isChart = false;
             chartView.repaint();
         } else {
-            wakeLock.release();
+            if (wakeLock.isHeld()) {
+                wakeLock.release();
+                super.onDestroy();
+            }
+
             chartView.clearFocus();
-            button.setText(R.string.start);
+
+            buttonText = getString(R.string.start);
+            button.setText(buttonText);
+
+            isChart = true;
 
             lineGraph.addAllDataX(graphListX);
             lineGraph.addAllDataY(graphListY);
@@ -202,5 +237,16 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("steps",steps);
+        outState.putBoolean("isRunning",isRunning);
+        outState.putString("buttonText",buttonText);
+        outState.putBoolean("isChart",isChart);
 
+        outState.putParcelableArrayList("graphListX",graphListX);
+        outState.putParcelableArrayList("graphListY",graphListY);
+        outState.putParcelableArrayList("graphListZ",graphListZ);
+
+    }
 }
